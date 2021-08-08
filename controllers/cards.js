@@ -6,9 +6,10 @@ const Card = require('../models/card');
 
 const getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.send({ data: cards }))
+    .orFail(new Error('CardsAreNotAddedYet'))
+    .then((cards) => res.status(200).send({ data: cards }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'CardsAreNotAddedYet') {
         res
           .status(BAD_REQUEST)
           .send({ message: `Карточки не найдены. Ошибка ${err.name}` });
@@ -23,7 +24,7 @@ const getCards = (req, res) => {
 const createCard = (req, res) => {
   const { name, link } = req.body;
   Card.create({ name, link })
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
@@ -39,9 +40,10 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findById(req.params.id)
-    .then((card) => res.send({ data: card }))
+    .orFail(new Error('NotValidId'))
+    .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'NotValidId') {
         res
           .status(NOT_FOUND)
           .send({ message: `Карточка не удалена. Ошибка ${err.name}` });
@@ -55,12 +57,13 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
+    .orFail(new Error('NotValidId'))
+    .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'NotValidId') {
         res
           .status(BAD_REQUEST)
-          .send({ message: `Ошибка ${err.name}` });
+          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
       } else {
         res
           .status(INTRNAL_SERVER_ERROR)
@@ -75,12 +78,13 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
+    .orFail(new Error('NotValidId'))
+    .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'NotValidId') {
         res
           .status(BAD_REQUEST)
-          .send({ message: `Ошибка ${err.name}` });
+          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
       } else {
         res
           .status(INTRNAL_SERVER_ERROR)

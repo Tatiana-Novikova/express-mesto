@@ -6,9 +6,10 @@ const User = require('../models/user');
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .orFail(new Error('UsersAreNotAddedYet'))
+    .then((users) => res.status(200).send({ data: users }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'UsersAreNotAddedYet') {
         res
           .status(BAD_REQUEST)
           .send({ message: `Пользователи не найдены. Ошибка ${err.name}` });
@@ -21,10 +22,11 @@ const getUsers = (req, res) => {
 };
 
 const getUser = (req, res) => {
-  User.findById(req.params.id)
-    .then((user) => res.send({ data: user }))
+  User.findById(req.params.userId)
+    .orFail(new Error('NotValidId'))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'NotValidId') {
         res
           .status(NOT_FOUND)
           .send({ message: `Запрашиваемый пользователь не найден. Ошибка ${err.name}` });
@@ -54,10 +56,11 @@ const createUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  User.findByIdAndUpdate(req.params.id, { new: true })
-    .then((user) => res.send({ data: user }))
+  User.findByIdAndUpdate(req.params.userId, { runValidators: true }, { new: true })
+    .orFail(new Error('NotValidId'))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'NotValidId') {
         res
           .status(BAD_REQUEST)
           .send({ message: `Переданы некорректные данные при обновлении профиля. Ошибка ${err}` });
@@ -74,10 +77,11 @@ const updateProfile = (req, res) => {
 };
 
 const updateAvatar = (req, res) => {
-  User.avatar.findByIdAndUpdate(req.params.id, { new: true })
-    .then((user) => res.send({ data: user }))
+  User.avatar.findByIdAndUpdate(req.params.userId, { runValidators: true }, { new: true })
+    .orFail(new Error('NotValidId'))
+    .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
-      if (err.name === '') {
+      if (err.message === 'NotValidId') {
         res
           .status(BAD_REQUEST)
           .send({ message: `Переданы некорректные данные при обновлении аватара. Ошибка ${err}` });
