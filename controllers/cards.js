@@ -6,24 +6,17 @@ const Card = require('../models/card');
 
 const getCards = (req, res) => {
   Card.find({})
-    .orFail(new Error('CardsAreNotAddedYet'))
     .then((cards) => res.status(200).send({ data: cards }))
     .catch((err) => {
-      if (err.name === 'CardsAreNotAddedYet') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: `Карточки не найдены. Ошибка ${err.name}` });
-      } else {
-        res
-          .status(INTRNAL_SERVER_ERROR)
-          .send({ message: `Ошибка сервера ${err.name}` });
-      }
+      res
+        .status(INTRNAL_SERVER_ERROR)
+        .send({ message: `Ошибка сервера ${err.name}` });
     });
 };
 
 const createCard = (req, res) => {
-  const { name, link } = req.body;
-  Card.create({ name, link })
+  const { name, link, owner } = req.body;
+  Card.create({ name, link, owner })
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -43,10 +36,14 @@ const deleteCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.messege === 'NotValidId') {
         res
           .status(NOT_FOUND)
           .send({ message: `Карточка не удалена. Ошибка ${err.name}` });
+      } else if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: `Переданы некорректные данные. Ошибка ${err.name}` });
       }
     });
 };
@@ -60,10 +57,14 @@ const likeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.messege === 'NotValidId') {
+        res
+          .status(NOT_FOUND)
+          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
+      } else if (err.name === 'CastError') {
         res
           .status(BAD_REQUEST)
-          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
+          .send({ message: `Переданы некорректные данные. Ошибка ${err.name}` });
       } else {
         res
           .status(INTRNAL_SERVER_ERROR)
@@ -81,10 +82,14 @@ const dislikeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
+      if (err.messege === 'NotValidId') {
+        res
+          .status(NOT_FOUND)
+          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
+      } else if (err.name === 'CastError') {
         res
           .status(BAD_REQUEST)
-          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
+          .send({ message: `Переданы некорректные данные. Ошибка ${err.name}` });
       } else {
         res
           .status(INTRNAL_SERVER_ERROR)

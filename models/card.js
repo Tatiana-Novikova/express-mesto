@@ -14,11 +14,12 @@ const cardSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Types.ObjectId,
     required: true,
-    default: [],
+    // решила оставить поле required
+    // и поправила cards в папке controllers (строки 25 и 26)
   },
   likes: {
     type: Array,
-    required: true,
+    default: [],
   },
   createdAt: {
     type: Date,

@@ -6,18 +6,11 @@ const User = require('../models/user');
 
 const getUsers = (req, res) => {
   User.find({})
-    .orFail(new Error('UsersAreNotAddedYet'))
     .then((users) => res.status(200).send({ data: users }))
     .catch((err) => {
-      if (err.message === 'UsersAreNotAddedYet') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: `Пользователи не найдены. Ошибка ${err.name}` });
-      } else {
-        res
-          .status(INTRNAL_SERVER_ERROR)
-          .send({ message: `Ошибка сервера ${err.name}` });
-      }
+      res
+        .status(INTRNAL_SERVER_ERROR)
+        .send({ message: `Ошибка сервера ${err.name}` });
     });
 };
 
@@ -30,6 +23,10 @@ const getUser = (req, res) => {
         res
           .status(NOT_FOUND)
           .send({ message: `Запрашиваемый пользователь не найден. Ошибка ${err.name}` });
+      } else if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
+          .send({ message: `Переданы некорректные данные. Ошибка ${err.name}` });
       } else {
         res
           .status(INTRNAL_SERVER_ERROR)
@@ -56,17 +53,17 @@ const createUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  User.findByIdAndUpdate(req.params.userId, { runValidators: true }, { new: true })
+  User.findByIdAndUpdate(req.params.userId, { runValidators: true, new: true })
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.message === 'NotValidId') {
         res
-          .status(BAD_REQUEST)
-          .send({ message: `Переданы некорректные данные при обновлении профиля. Ошибка ${err}` });
-      } else if (err.name === 'ValidationError') {
-        res
           .status(NOT_FOUND)
+          .send({ message: `Переданы некорректные данные при обновлении профиля. Ошибка ${err}` });
+      } else if (err.name === 'CastError') {
+        res
+          .status(BAD_REQUEST)
           .send({ message: `Запрашиваемый пользователь не найден. Ошибка ${err}` });
       } else {
         res
@@ -77,17 +74,17 @@ const updateProfile = (req, res) => {
 };
 
 const updateAvatar = (req, res) => {
-  User.avatar.findByIdAndUpdate(req.params.userId, { runValidators: true }, { new: true })
+  User.avatar.findByIdAndUpdate(req.params.userId, { runValidators: true, new: true })
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.message === 'NotValidId') {
         res
-          .status(BAD_REQUEST)
+          .status(NOT_FOUND)
           .send({ message: `Переданы некорректные данные при обновлении аватара. Ошибка ${err}` });
       } else if (err.name === 'CastError') {
         res
-          .status(NOT_FOUND)
+          .status(BAD_REQUEST)
           .send({ message: `Запрашиваемый пользователь не найден. Ошибка ${err}` });
       } else {
         res
