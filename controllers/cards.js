@@ -15,7 +15,7 @@ const getCards = (req, res) => {
 };
 
 const createCard = (req, res) => {
-  const { name, link, owner } = req.body;
+  const { name, link, owner = req.user._id } = req.body;
   Card.create({ name, link, owner })
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
@@ -32,11 +32,11 @@ const createCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findById(req.params.id)
+  Card.findById(req.params.cardId)
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.messege === 'NotValidId') {
+      if (err.message === 'NotValidId') {
         res
           .status(NOT_FOUND)
           .send({ message: `Карточка не удалена. Ошибка ${err.name}` });
@@ -57,7 +57,7 @@ const likeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.messege === 'NotValidId') {
+      if (err.message === 'NotValidId') {
         res
           .status(NOT_FOUND)
           .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
@@ -82,7 +82,7 @@ const dislikeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
-      if (err.messege === 'NotValidId') {
+      if (err.message === 'NotValidId') {
         res
           .status(NOT_FOUND)
           .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
