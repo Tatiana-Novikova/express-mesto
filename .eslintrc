@@ -7,6 +7,9 @@
         "allow": ["_id"]
       }
     ],
-    "no-console": "off"
+    "consistent-return": "off",
+    "no-console": "off",
+    "prefer-destructuring": "off",
+    "no-unused-vars": "off"
   }
 }

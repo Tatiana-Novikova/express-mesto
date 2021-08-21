@@ -1,32 +1,28 @@
-const BAD_REQUEST = 400;
-const NOT_FOUND = 404;
-const INTRNAL_SERVER_ERROR = 500;
+const OK = 200;
+
+const BadRequestError = require('../errors/bad-request-error');
+const NotFoundError = require('../errors/not-found-error');
+const InternalServerError = require('../errors/internal-server-error');
 
 const Card = require('../models/card');
 
 const getCards = (req, res) => {
   Card.find({})
-    .then((cards) => res.status(200).send({ data: cards }))
+    .then((cards) => res.status(OK).send({ data: cards }))
     .catch((err) => {
-      res
-        .status(INTRNAL_SERVER_ERROR)
-        .send({ message: `Ошибка сервера ${err.name}` });
+      throw new InternalServerError('На сервере произошла ошибка');
     });
 };
 
 const createCard = (req, res) => {
   const { name, link, owner = req.user._id } = req.body;
   Card.create({ name, link, owner })
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: `Карточка не создана. Ошибка ${err.name}` });
+        throw new BadRequestError(`Карточка не создана. Ошибка ${err.name}`);
       } else {
-        res
-          .status(INTRNAL_SERVER_ERROR)
-          .send({ message: `Ошибка сервера ${err.name}` });
+        throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }
     });
 };
@@ -34,16 +30,16 @@ const createCard = (req, res) => {
 const deleteCard = (req, res) => {
   Card.findById(req.params.cardId)
     .orFail(new Error('NotValidId'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => {
+      if (card.owner._id === req.user._id) {
+        res.status(OK).send({ data: card });
+      }
+    })
     .catch((err) => {
       if (err.message === 'NotValidId') {
-        res
-          .status(NOT_FOUND)
-          .send({ message: `Карточка не удалена. Ошибка ${err.name}` });
+        throw new NotFoundError(`Карточка не удалена. Ошибка ${err.name}`);
       } else if (err.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: `Переданы некорректные данные. Ошибка ${err.name}` });
+        throw new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`);
       }
     });
 };
@@ -55,20 +51,14 @@ const likeCard = (req, res) => {
     { new: true },
   )
     .orFail(new Error('NotValidId'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
       if (err.message === 'NotValidId') {
-        res
-          .status(NOT_FOUND)
-          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
+        throw new NotFoundError(`Карточка не найдена. Ошибка ${err.name}`);
       } else if (err.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: `Переданы некорректные данные. Ошибка ${err.name}` });
+        throw new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`);
       } else {
-        res
-          .status(INTRNAL_SERVER_ERROR)
-          .send({ message: `Ошибка сервера ${err.name}` });
+        throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }
     });
 };
@@ -80,20 +70,14 @@ const dislikeCard = (req, res) => {
     { new: true },
   )
     .orFail(new Error('NotValidId'))
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
       if (err.message === 'NotValidId') {
-        res
-          .status(NOT_FOUND)
-          .send({ message: `Карточка не найдена. Ошибка ${err.name}` });
+        throw new NotFoundError(`Карточка не найдена. Ошибка ${err.name}`);
       } else if (err.name === 'CastError') {
-        res
-          .status(BAD_REQUEST)
-          .send({ message: `Переданы некорректные данные. Ошибка ${err.name}` });
+        throw new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`);
       } else {
-        res
-          .status(INTRNAL_SERVER_ERROR)
-          .send({ message: `Ошибка сервера ${err.name}` });
+        throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }
     });
 };
