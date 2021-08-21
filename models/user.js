@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
 
-const validAvatar = /https?:\/\/(www\.)?\da-zа-я0-9-\._~:\/\?#\[\]@!$&'\(\)\*\+,;=]#?/g;
+const validAvatar = /https?:\/\/(www\.)?a-zа-я0-9-\._~:\/\?#\[\]@!\$&'\(\)\*\+,;=]#?/g;
 
 const userSchema = new mongoose.Schema({
   name: {
