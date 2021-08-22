@@ -10,6 +10,7 @@
     "consistent-return": "off",
     "no-console": "off",
     "prefer-destructuring": "off",
-    "no-unused-vars": "off"
+    "no-unused-vars": "off",
+    "object-shorthand": "off"
   }
 }
