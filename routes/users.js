@@ -16,7 +16,10 @@ const user = require('../models/user');
 router.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required(),
-    password: Joi.string().required(),
+    password: Joi.string().required().custom(
+      isEmail,
+      'Неправильный формат почты',
+    ),
   }),
 }), login);
 
@@ -33,7 +36,10 @@ router.post('/signup', celebrate({
     about: Joi.string().default('Исследователь'),
     avatar: Joi.string().default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png'),
     email: Joi.string().required(),
-    password: Joi.string().required(),
+    password: Joi.string().required().custom(
+      isEmail,
+      'Неправильный формат почты',
+    ),
   }),
 }), createUser);
 

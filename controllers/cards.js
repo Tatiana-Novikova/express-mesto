@@ -36,10 +36,10 @@ const deleteCard = (req, res) => {
       }
     })
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError(`Карточка не удалена. Ошибка ${err.name}`);
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         throw new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`);
+      } else if (err.message === 'NotValidId') {
+        throw new NotFoundError(`Карточка не удалена. Ошибка ${err.name}`);
       }
     });
 };
@@ -53,10 +53,10 @@ const likeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError(`Карточка не найдена. Ошибка ${err.name}`);
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         throw new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`);
+      } else if (err.message === 'NotValidId') {
+        throw new NotFoundError(`Карточка не найдена. Ошибка ${err.name}`);
       } else {
         throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }
@@ -72,10 +72,10 @@ const dislikeCard = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((card) => res.status(OK).send({ data: card }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError(`Карточка не найдена. Ошибка ${err.name}`);
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         throw new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`);
+      } else if (err.message === 'NotValidId') {
+        throw new NotFoundError(`Карточка не найдена. Ошибка ${err.name}`);
       } else {
         throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }

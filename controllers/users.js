@@ -60,10 +60,10 @@ const getUser = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(OK).send({ data: user }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError(`Запрашиваемый пользователь не найден. Ошибка ${err.name}`);
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         throw new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`);
+      } else if (err.message === 'NotValidId') {
+        throw new NotFoundError(`Запрашиваемый пользователь не найден. Ошибка ${err.name}`);
       } else {
         throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }
@@ -100,10 +100,10 @@ const updateProfile = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(OK).send({ data: user }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError(`Переданы некорректные данные при обновлении профиля. Ошибка ${err.name}`);
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         throw new BadRequestError(`Запрашиваемый пользователь не найден. Ошибка ${err.name}`);
+      } else if (err.message === 'NotValidId') {
+        throw new NotFoundError(`Переданы некорректные данные при обновлении профиля. Ошибка ${err.name}`);
       } else {
         throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }
@@ -115,10 +115,10 @@ const updateAvatar = (req, res) => {
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(OK).send({ data: user }))
     .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError(`Переданы некорректные данные при обновлении аватара. Ошибка ${err.name}`);
-      } else if (err.name === 'CastError') {
+      if (err.name === 'CastError') {
         throw new BadRequestError(`Запрашиваемый пользователь не найден. Ошибка ${err.name}`);
+      } else if (err.message === 'NotValidId') {
+        throw new NotFoundError(`Переданы некорректные данные при обновлении аватара. Ошибка ${err.name}`);
       } else {
         throw new InternalServerError(`На сервере произошла ошибка ${err.name}`);
       }
