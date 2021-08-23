@@ -12,16 +12,15 @@ const limiter = rateLimit({
   max: 100,
 });
 const rootRouter = require('./routes');
-const auth = require('./middlewares/auth');
 
 app.use(express.json());
 app.use(helmet());
 app.use(limiter);
 app.disable('x-powered-by');
-app.use('/', rootRouter);
-app.use(auth);
 
 app.use(errors());
+app.use('/', rootRouter);
+
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res

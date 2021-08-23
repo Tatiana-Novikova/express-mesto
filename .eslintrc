@@ -11,6 +11,8 @@
     "no-console": "off",
     "prefer-destructuring": "off",
     "no-unused-vars": "off",
-    "object-shorthand": "off"
+    "object-shorthand": "off",
+    "no-shadow": "off",
+    "no-else-return": "off"
   }
 }

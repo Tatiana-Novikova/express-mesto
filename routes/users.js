@@ -11,17 +11,39 @@ const {
   updateProfile,
   updateAvatar,
 } = require('../controllers/users');
-const user = require('../models/user');
+
+router.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).default('Жак-Ив Кусто'),
+    about: Joi.string().default('Исследователь'),
+    avatar: Joi.string().default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png'),
+    email: Joi.string().required().custom(
+      (value) => {
+        if (isEmail(value)) {
+          return value;
+        }
+      },
+      'Неправильный формат почты',
+    ),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 
 router.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required(),
-    password: Joi.string().required().custom(
-      isEmail,
+    email: Joi.string().required().custom(
+      (value) => {
+        if (isEmail(value)) {
+          return value;
+        }
+      },
       'Неправильный формат почты',
     ),
+    password: Joi.string().required(),
   }),
 }), login);
+
+router.use(auth);
 
 router.get('/', auth, getUsers);
 router.get('/:userId', celebrate({
@@ -29,19 +51,8 @@ router.get('/:userId', celebrate({
     userId: Joi.string().alphanum().length(24),
   }),
 }), auth, getUser);
+
 router.get('/me', auth, getUser);
-router.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).default('Жак-Ив Кусто'),
-    about: Joi.string().default('Исследователь'),
-    avatar: Joi.string().default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png'),
-    email: Joi.string().required(),
-    password: Joi.string().required().custom(
-      isEmail,
-      'Неправильный формат почты',
-    ),
-  }),
-}), createUser);
 
 router.patch('/me', celebrate({
   params: Joi.object().keys({
