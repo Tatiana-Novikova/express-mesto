@@ -57,9 +57,6 @@ const login = (req, res, next) => {
         return next(new UnauthorizedError('Такого пользователя нет. Неправильные почта или пароль'));
       } else {
         bcrypt.compare(password, user.password, ((err, isValid) => {
-          if (err || !password || password === '') {
-            return next(new ForbiddenError(`Пароль не может быть пустым. Ошибка ${err.name}`));
-          }
           if (!isValid) {
             return next(new ForbiddenError('Неправильный пароль'));
           }
@@ -76,13 +73,9 @@ const login = (req, res, next) => {
         }));
       }
     })
-    .catch((err) => {
-      if (err.validation.message === '"password" is required' || err.validation.message === '"email" is required') {
-        return next(BadRequestError('Поля email и пароль не могут быть пустыми'));
-      } else if (err.code === '403') {
-        return next(new UnauthorizedError(`Пользователь не авторизован. Ошибка ${err.name}`));
-      }
-    });
+    .catch((err) => next(
+      new UnauthorizedError(`Пользователь не авторизован. Ошибка ${err.name}`),
+    ));
 };
 
 const getUsers = (req, res, next) => {
