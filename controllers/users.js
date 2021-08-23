@@ -37,7 +37,7 @@ const createUser = (req, res, next) => {
               .then((user) => res.status(CREATED).send({ user: user.toJSON() }))
               .catch((err) => {
                 if (err.name === 'ValidationError') {
-                  return next(new BadRequestError(`Пользователь не создан. Ошибка ${err.name}`));
+                  return next(new BadRequestError(`Переданы некорректные данные при создании пользователя. Ошибка ${err.name}`));
                 } else if (err.name === 'MongoError' && err.code === 11000) {
                   return next(new ConflictError(`Пользователь c таким адресом уже существует. Ошибка ${err.name}`));
                 } else {
@@ -91,10 +91,8 @@ const getUser = (req, res, next) => {
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(OK).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(`Переданы некорректные данные. Ошибка ${err.name}`));
-      } else if (err.message === 'NotValidId') {
-        return next(new NotFoundError(`Запрашиваемый пользователь не найден. Ошибка ${err.name}`));
+      if (err.message === 'NotValidId') {
+        return next(new NotFoundError(`Пользователь по указанному _id не найден. Ошибка ${err.name}`));
       } else {
         return next(new InternalServerError(`На сервере произошла ошибка ${err.name}`));
       }
@@ -106,10 +104,10 @@ const updateProfile = (req, res, next) => {
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(OK).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(`Запрашиваемый пользователь не найден. Ошибка ${err.name}`));
-      } else if (err.message === 'NotValidId') {
-        return next(new NotFoundError(`Переданы некорректные данные при обновлении профиля. Ошибка ${err.name}`));
+      if (err.message === 'CastError') {
+        return next(new BadRequestError(`Переданы некорректные данные при обновлении профиля. Ошибка ${err.name}`));
+      } else if (err.name === 'NotValidId') {
+        return next(new NotFoundError(`Пользователь с указанным _id не найден. Ошибка ${err.name}`));
       } else {
         return next(new InternalServerError(`На сервере произошла ошибка ${err.name}`));
       }
@@ -121,10 +119,10 @@ const updateAvatar = (req, res, next) => {
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(OK).send({ data: user }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(`Запрашиваемый пользователь не найден. Ошибка ${err.name}`));
-      } else if (err.message === 'NotValidId') {
-        return next(new NotFoundError(`Переданы некорректные данные при обновлении аватара. Ошибка ${err.name}`));
+      if (err.message === 'CastError') {
+        return next(new BadRequestError(`Переданы некорректные данные при обновлении аватара. Ошибка ${err.name}`));
+      } else if (err.name === 'NotValidId') {
+        return next(new NotFoundError(`Пользователь с указанным _id не найден. Ошибка ${err.name}`));
       } else {
         return next(new InternalServerError(`На сервере произошла ошибка ${err.name}`));
       }
