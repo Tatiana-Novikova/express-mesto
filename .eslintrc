@@ -13,6 +13,7 @@
     "no-unused-vars": "off",
     "object-shorthand": "off",
     "no-shadow": "off",
-    "no-else-return": "off"
+    "no-else-return": "off",
+    "arrow-body-style": "off"
   }
 }

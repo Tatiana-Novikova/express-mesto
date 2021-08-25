@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const isURL = require('validator/lib/isURL');
+
+const validLink = /https?:\/\/(www\.)?[a-zA-Zа-яА-Я0-9._~:/?#[\]@!$&’()*+,;=\\-]+#?/g;
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -10,6 +13,14 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (v) => {
+        validLink.test(v);
+        const isValid = isURL(v);
+        return isValid;
+      },
+      message: 'Неправильный формат ссылки',
+    },
   },
   owner: {
     type: mongoose.Types.ObjectId,

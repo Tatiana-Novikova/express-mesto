@@ -1,44 +1,71 @@
 const OK = 200;
+const CREATED = 201;
 
 const BadRequestError = require('../errors/bad-request-error');
+const ForbiddenError = require('../errors/forbidden-error');
 const NotFoundError = require('../errors/not-found-error');
-const InternalServerError = require('../errors/internal-server-error');
 
 const Card = require('../models/card');
 
 const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(OK).send({ data: cards }))
-    .catch((err) => next(
-      new InternalServerError('На сервере произошла ошибка'),
-    ));
+    .catch(next);
 };
 
 const createCard = (req, res, next) => {
   const { name, link, owner = req.user._id } = req.body;
   Card.create({ name, link, owner })
-    .then((card) => res.status(OK).send({ data: card }))
+    .then((card) => res.status(CREATED).send({
+      likes: card.likes,
+      _id: card._id,
+      name: card.name,
+      link: card.link,
+      owner: req.user,
+      createdAt: card.createdAt,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError(`Переданы некорректные данные при создании карточки. Ошибка ${err.name}`));
+        return next(
+          new BadRequestError(
+            `Переданы некорректные данные при создании карточки. Ошибка ${err.name}`,
+          ),
+        );
       } else {
-        return next(new InternalServerError(`На сервере произошла ошибка ${err.name}`));
+        next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  const { cardId } = req.params;
+  const userId = req.user._id;
+
+  Card.findById(cardId)
     .then((card) => {
-      if (card.owner._id === req.user._id) {
-        res.status(OK).send({ data: card });
+      if (!card) {
+        throw new NotFoundError('Карточка с указанным id не найдена');
       }
+      if (card.owner.toString() !== userId) {
+        next(
+          new ForbiddenError(
+            'Пользователь может удалить только свою карточку',
+          ),
+        );
+        return;
+      }
+      card.deleteOne();
+      res.send({ message: 'Карточка успешно удалена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new NotFoundError(`Карточка с указанным _id не найдена. Ошибка ${err.name}`));
+        throw new NotFoundError('Карточка с указанным id не найдена');
+      } else {
+        next(err);
       }
-    });
+    })
+    .catch(next);
 };
 
 const likeCard = (req, res, next) => {
@@ -51,10 +78,9 @@ const likeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError(`Переданы некорректные данные для постановки лайка. Ошибка ${err.name}`));
-      } else {
-        return next(new InternalServerError(`На сервере произошла ошибка ${err.name}`));
       }
-    });
+    })
+    .catch(next);
 };
 
 const dislikeCard = (req, res, next) => {
@@ -67,10 +93,9 @@ const dislikeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError(`Переданы некорректные данные для снятии лайка. Ошибка ${err.name}`));
-      } else {
-        return next(new InternalServerError(`На сервере произошла ошибка ${err.name}`));
       }
-    });
+    })
+    .catch(next);
 };
 
 module.exports = {
