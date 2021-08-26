@@ -56,7 +56,7 @@ const deleteCard = (req, res, next) => {
         return;
       }
       card.deleteOne();
-      res.send({ message: 'Карточка успешно удалена' });
+      res.send({ message: 'Пост удалён' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -74,7 +74,14 @@ const likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(OK).send({ data: card }))
+    .then((card) => res.status(OK).send({
+      likes: card.likes,
+      _id: card._id,
+      name: card.name,
+      link: card.link,
+      owner: req.user,
+      createdAt: card.createdAt,
+    }))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError(`Переданы некорректные данные для постановки лайка. Ошибка ${err.name}`));
@@ -89,7 +96,14 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(OK).send({ data: card }))
+    .then((card) => res.status(OK).send({
+      likes: card.likes,
+      _id: card._id,
+      name: card.name,
+      link: card.link,
+      owner: req.user,
+      createdAt: card.createdAt,
+    }))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new BadRequestError(`Переданы некорректные данные для снятии лайка. Ошибка ${err.name}`));

@@ -102,7 +102,12 @@ const createUser = (req, res, next) => {
             })
               .then((user) => {
                 res.status(CREATED)
-                  .send({ message: 'Успешная регистрация' });
+                  .send({
+                    data: {
+                      id: user._id,
+                      email: user.email,
+                    },
+                  });
               })
               .catch((err) => {
                 if (err.name === 'ValidationError') {
@@ -161,7 +166,7 @@ const login = (req, res, next) => {
             res.cookie('jwt', token, {
               httpOnly: true,
               sameSite: true,
-            }).status(OK).send({ message: 'Успешная авторизация' });
+            }).status(OK).send({ token: token });
           }
         }));
       }
