@@ -12,27 +12,27 @@ const {
 
 router.use(auth);
 
-router.get('/', auth, getCards);
-router.post('/', auth, celebrate({
+router.get('/', getCards);
+router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required(),
   }),
-}), auth, createCard);
+}), createCard);
 router.delete('/:cardId', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
+    cardId: Joi.string(),
   }),
-}), auth, deleteCard);
+}), deleteCard);
 router.put('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
+    cardId: Joi.string(),
   }),
-}), auth, likeCard);
+}), likeCard);
 router.delete('/:cardId/likes', celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().alphanum().length(24),
+    cardId: Joi.string(),
   }),
-}), auth, dislikeCard);
+}), dislikeCard);
 
 module.exports = router;

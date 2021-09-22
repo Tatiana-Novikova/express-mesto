@@ -8,10 +8,6 @@
       }
     ],
     "consistent-return": "off",
-    "no-console": "off",
-    "prefer-destructuring": "off",
-    "no-unused-vars": "off",
-    "object-shorthand": "off",
     "no-shadow": "off",
     "no-else-return": "off",
     "arrow-body-style": "off"

@@ -1,15 +1,15 @@
 const OK = 200;
 const CREATED = 201;
 
-const BadRequestError = require('../errors/bad-request-error');
-const ForbiddenError = require('../errors/forbidden-error');
-const NotFoundError = require('../errors/not-found-error');
+const ForbiddenError = require('../errors/bad-request-error');
+const NotFoundError = require('../errors/bad-request-error');
 
 const Card = require('../models/card');
+const errorHandler = require('../middlewares/error-handler');
 
 const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(OK).send({ data: cards }))
+    .then((cards) => res.status(OK).send({ cards }))
     .catch(next);
 };
 
@@ -21,20 +21,10 @@ const createCard = (req, res, next) => {
       _id: card._id,
       name: card.name,
       link: card.link,
-      owner: req.user,
+      owner: card.owner,
       createdAt: card.createdAt,
     }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(
-          new BadRequestError(
-            `Переданы некорректные данные при создании карточки. Ошибка ${err.name}`,
-          ),
-        );
-      } else {
-        next(err);
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 
@@ -58,13 +48,7 @@ const deleteCard = (req, res, next) => {
       card.deleteOne();
       res.send({ message: 'Пост удалён' });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new NotFoundError('Карточка с указанным id не найдена');
-      } else {
-        next(err);
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 
@@ -79,14 +63,10 @@ const likeCard = (req, res, next) => {
       _id: card._id,
       name: card.name,
       link: card.link,
-      owner: req.user,
+      owner: card.owner,
       createdAt: card.createdAt,
     }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(`Переданы некорректные данные для постановки лайка. Ошибка ${err.name}`));
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 
@@ -101,14 +81,10 @@ const dislikeCard = (req, res, next) => {
       _id: card._id,
       name: card.name,
       link: card.link,
-      owner: req.user,
+      owner: card.owner,
       createdAt: card.createdAt,
     }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(`Переданы некорректные данные для снятии лайка. Ошибка ${err.name}`));
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 

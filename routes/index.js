@@ -6,7 +6,7 @@ const cardRouter = require('./cards');
 
 router.use('/users', userRouter);
 router.use('/cards', cardRouter);
-router.get('*', (req, res) => {
+router.use('*', () => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');
 });
 

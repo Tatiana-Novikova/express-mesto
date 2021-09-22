@@ -52,24 +52,24 @@ router.get('/me', celebrate({
   params: Joi.object().keys({
     userId: Joi.string(),
   }),
-}), auth, getCurrentUser);
+}), getCurrentUser);
 
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string(),
   }),
-}), auth, getUserById);
+}), getUserById);
 
 router.patch('/me', celebrate({
   params: Joi.object().keys({
     userId: Joi.string(),
   }),
-}), auth, updateProfile);
+}), updateProfile);
 
 router.patch('/me/avatar', celebrate({
   params: Joi.object().keys({
     userId: Joi.string(),
   }),
-}), auth, updateAvatar);
+}), updateAvatar);
 
 module.exports = router;

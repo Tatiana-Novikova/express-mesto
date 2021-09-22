@@ -4,17 +4,17 @@ const CREATED = 201;
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const BadRequestError = require('../errors/bad-request-error');
-const UnauthorizedError = require('../errors/unauthorized');
+const UnauthorizedError = require('../errors/unauthorized-error');
 const NotFoundError = require('../errors/not-found-error');
 const ConflictError = require('../errors/conflict-error');
 
 const User = require('../models/user');
+const errorHandler = require('../middlewares/error-handler');
 
 const getUsers = (req, res, next) => {
   return User.find({})
-    .then((users) => res.status(OK).send({ data: users }))
-    .catch((err) => next(err));
+    .then((users) => res.status(OK).send({ users }))
+    .catch(next);
 };
 
 const getCurrentUser = (req, res, next) => {
@@ -32,13 +32,7 @@ const getCurrentUser = (req, res, next) => {
         cohort: user.cohort,
       });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new NotFoundError('Пользователь с указанным _id не найден');
-      } else {
-        next(err);
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 
@@ -57,13 +51,7 @@ const getUserById = (req, res, next) => {
         cohort: user.cohort,
       });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new NotFoundError('Пользователь с указанным _id не найден');
-      } else {
-        next(err);
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 
@@ -109,22 +97,8 @@ const createUser = (req, res, next) => {
                     },
                   });
               })
-              .catch((err) => {
-                if (err.name === 'ValidationError') {
-                  return (
-                    new BadRequestError(
-                      `Переданы некорректные данные при создании пользователя. Ошибка ${err.name}`,
-                    )
-                  );
-                }
-                if (err.name === 'MongoError' && err.code === 11000) {
-                  return next(
-                    new ConflictError(
-                      `Пользователь c таким адресом уже существует. Ошибка ${err.name}`,
-                    ),
-                  );
-                }
-              });
+              .catch(errorHandler)
+              .catch(next);
           });
       }
     })
@@ -166,14 +140,12 @@ const login = (req, res, next) => {
             res.cookie('jwt', token, {
               httpOnly: true,
               sameSite: true,
-            }).status(OK).send({ token: token });
+            }).status(OK).send({ token: `${token}` });
           }
         }));
       }
     })
-    .catch((err) => next(
-      new UnauthorizedError(`Пользователь не авторизован. Ошибка ${err.name}`),
-    ))
+    .catch(errorHandler)
     .catch(next);
 };
 
@@ -194,15 +166,7 @@ const updateProfile = (req, res, next) => {
         cohort: user.cohort,
       });
     })
-    .catch((err) => {
-      if (err.message === 'CastError') {
-        return next(
-          new BadRequestError(
-            `Переданы некорректные данные при обновлении профиля. Ошибка ${err.name}`,
-          ),
-        );
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 
@@ -225,15 +189,7 @@ const updateAvatar = (req, res, next) => {
         cohort: user.cohort,
       });
     })
-    .catch((err) => {
-      if (err.message === 'CastError') {
-        return next(
-          new BadRequestError(
-            `Переданы некорректные данные при обновлении аватара. Ошибка ${err.name}`,
-          ),
-        );
-      }
-    })
+    .catch(errorHandler)
     .catch(next);
 };
 
