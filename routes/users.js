@@ -1,75 +1,23 @@
-const { celebrate, Joi } = require('celebrate');
-const isEmail = require('validator/lib/isEmail');
 const router = require('express').Router();
-const auth = require('../middlewares/auth');
 
 const {
-  login,
   getUsers,
   getCurrentUser,
   getUserById,
-  createUser,
   updateProfile,
   updateAvatar,
 } = require('../controllers/users');
 
-router.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).default('Жак-Ив Кусто'),
-    about: Joi.string().default('Исследователь'),
-    avatar: Joi.string().default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png'),
-    email: Joi.string().required().custom(
-      (value) => {
-        if (isEmail(value)) {
-          return value;
-        }
-      },
-      'Неправильный формат почты',
-    ),
-    password: Joi.string().required(),
-  }),
-}), createUser);
+const {
+  validateUserId,
+  validateUpdateProfile,
+  validateUpdateAvatar,
+} = require('../middlewares/celebrate-validator');
 
-router.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().custom(
-      (value) => {
-        if (isEmail(value)) {
-          return value;
-        }
-      },
-      'Неправильный формат почты',
-    ),
-    password: Joi.string().required(),
-  }),
-}), login);
-
-router.use(auth);
-
-router.get('/', auth, getUsers);
-
-router.get('/me', celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string(),
-  }),
-}), getCurrentUser);
-
-router.get('/:userId', celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string(),
-  }),
-}), getUserById);
-
-router.patch('/me', celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string(),
-  }),
-}), updateProfile);
-
-router.patch('/me/avatar', celebrate({
-  params: Joi.object().keys({
-    userId: Joi.string(),
-  }),
-}), updateAvatar);
+router.get('/users', getUsers);
+router.get('/users/me', validateUserId, getCurrentUser);
+router.get('/users/:userId', validateUserId, getUserById);
+router.patch('/users/me', validateUpdateProfile, updateProfile);
+router.patch('/users/me/avatar', validateUpdateAvatar, updateAvatar);
 
 module.exports = router;

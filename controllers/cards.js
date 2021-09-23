@@ -1,7 +1,7 @@
 const OK = 200;
 const CREATED = 201;
 
-const ForbiddenError = require('../errors/bad-request-error');
+const ForbiddenError = require('../errors/forbidden-error');
 const NotFoundError = require('../errors/bad-request-error');
 
 const Card = require('../models/card');
@@ -24,8 +24,7 @@ const createCard = (req, res, next) => {
       owner: card.owner,
       createdAt: card.createdAt,
     }))
-    .catch(errorHandler)
-    .catch(next);
+    .catch(errorHandler);
 };
 
 const deleteCard = (req, res, next) => {
@@ -35,21 +34,22 @@ const deleteCard = (req, res, next) => {
   Card.findById(cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка с указанным id не найдена');
+        return next(new NotFoundError('Карточка с указанным id не найдена'));
       }
       if (card.owner.toString() !== userId) {
-        next(
-          new ForbiddenError(
-            'Пользователь может удалить только свою карточку',
-          ),
-        );
-        return;
+        return next(new ForbiddenError('Пользователь может удалить только свою карточку'));
       }
       card.deleteOne();
       res.send({ message: 'Пост удалён' });
     })
-    .catch(errorHandler)
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new NotFoundError('Карточка с указанным id не найдена'));
+      } else {
+        next(err);
+      }
+    })
+    .catch(errorHandler);
 };
 
 const likeCard = (req, res, next) => {
@@ -58,16 +58,27 @@ const likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(OK).send({
-      likes: card.likes,
-      _id: card._id,
-      name: card.name,
-      link: card.link,
-      owner: card.owner,
-      createdAt: card.createdAt,
-    }))
-    .catch(errorHandler)
-    .catch(next);
+    .then((card) => {
+      if (!card) {
+        return next(new NotFoundError('Карточка с указанным id не найдена'));
+      }
+      res.status(OK).send({
+        likes: card.likes,
+        _id: card._id,
+        name: card.name,
+        link: card.link,
+        owner: card.owner,
+        createdAt: card.createdAt,
+      });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new NotFoundError('Карточка с указанным id не найдена'));
+      } else {
+        next(err);
+      }
+    })
+    .catch(errorHandler);
 };
 
 const dislikeCard = (req, res, next) => {
@@ -84,8 +95,7 @@ const dislikeCard = (req, res, next) => {
       owner: card.owner,
       createdAt: card.createdAt,
     }))
-    .catch(errorHandler)
-    .catch(next);
+    .catch(errorHandler);
 };
 
 module.exports = {

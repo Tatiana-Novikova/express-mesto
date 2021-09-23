@@ -9,16 +9,16 @@ const errorHandler = (err, req, res, next) => {
     || err.name === 'CastError'
     || err.message === 'Validation failed'
   ) {
-    return next(new BadRequestError('BadRequestError'));
+    throw new BadRequestError(err.message);
   }
   if (err.message === 'Not Authorized') {
-    return next(new UnauthorizedError('UnauthorizedError'));
+    throw new UnauthorizedError(err.message);
   }
   if (err.message === 'Forbidden') {
-    return next(new ForbiddenError('ForbiddenError'));
+    throw new ForbiddenError(err.message);
   }
   if (err.message === 'Not found') {
-    return next(new NotFoundError('NotFoundError'));
+    throw new NotFoundError(err.message);
   }
 };
 
