@@ -2,7 +2,7 @@ const OK = 200;
 const CREATED = 201;
 
 const ForbiddenError = require('../errors/forbidden-error');
-const NotFoundError = require('../errors/bad-request-error');
+const NotFoundError = require('../errors/not-found-error');
 
 const Card = require('../models/card');
 const errorHandler = require('../middlewares/error-handler');
@@ -87,14 +87,26 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.status(OK).send({
-      likes: card.likes,
-      _id: card._id,
-      name: card.name,
-      link: card.link,
-      owner: card.owner,
-      createdAt: card.createdAt,
-    }))
+    .then((card) => {
+      if (!card) {
+        return next(new NotFoundError('Карточка с указанным id не найдена'));
+      }
+      res.status(OK).send({
+        likes: card.likes,
+        _id: card._id,
+        name: card.name,
+        link: card.link,
+        owner: card.owner,
+        createdAt: card.createdAt,
+      });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new NotFoundError('Карточка с указанным id не найдена'));
+      } else {
+        next(err);
+      }
+    })
     .catch(errorHandler);
 };
 

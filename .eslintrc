@@ -10,6 +10,7 @@
     "consistent-return": "off",
     "no-shadow": "off",
     "no-else-return": "off",
-    "arrow-body-style": "off"
+    "arrow-body-style": "off",
+    "no-unused-vars": "off"
   }
 }
